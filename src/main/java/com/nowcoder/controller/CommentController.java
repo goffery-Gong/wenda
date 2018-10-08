@@ -53,8 +53,9 @@ public class CommentController {
                              @RequestParam("content") String content) {
         try {
             content = HtmlUtils.htmlEscape(content);
-            content = sensitiveService.filter(content);
             // 过滤content
+            content = sensitiveService.filter(content);
+            
             Comment comment = new Comment();
             if (hostHolder.getUser() != null) {
                 comment.setUserId(hostHolder.getUser().getId());

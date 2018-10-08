@@ -35,18 +35,20 @@ public class SensitiveService implements InitializingBean {
 
 		String replance = "***";
 		TrieNode tempNode = rootNode;
-		int begin = 0;
-		int position = 0;
+		int begin = 0;	// begin总是不断向前，position匹配失败的时候，需要回滚。开始下标为0.
+		int position = 0;	//当前比较的位置，下标从0开始
 		StringBuilder result = new StringBuilder();
 
 		while (position < text.length()) {
 			char c = text.charAt(position);
 			// 先判断字符：将不是英文字母和中文的字符过滤掉
 			if (isSymbol(c)) {
+				//如果在敏感词中之外的位置（即tempNode==根节点）加了空格之类，直接将字符输出到结果中，然后++begin,++positon;
 				if (tempNode == rootNode) {
 					result.append(c);
 					++begin;
 				}
+				//如果在敏感词中间加了空格之类：“色 情”，position就直接跳过空格到下一个
 				++position;
 				continue;
 			}
@@ -56,7 +58,7 @@ public class SensitiveService implements InitializingBean {
 			if (tempNode == null) {
 				// 没有以c开头的敏感词
 				result.append(text.charAt(begin));
-				position = begin + 1;
+				position = begin + 1;//不是postion+1：因为可能出现“色哈情”这种，position移动到了哈上，但最终匹配失败的情况。
 				begin = position;
 				tempNode = rootNode;
 			} else if (tempNode.isKeywordEnd()) {
@@ -153,7 +155,8 @@ public class SensitiveService implements InitializingBean {
 		SensitiveService s = new SensitiveService();
 		s.addWord("色情");
 		s.addWord("赌博");
-		System.out.println(s.filter("你 好色情，爱赌 博"));
+		System.out.println(s.filter(" 你 好色情，爱赌 博"));
+		System.out.println(s.isSymbol('宫'));
 	}
 
 }
