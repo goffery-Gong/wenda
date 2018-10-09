@@ -73,6 +73,64 @@ zhihu
 	数据安全性的保障手段：https使用公钥加密私钥解密，比如支付宝的密码加密，单点登录验证，验证码机制等。
 
 ## 问题发表功能（敏感词过滤）
-通过创建字典树，并进行查找比较，实现敏感词过滤
+防止xss注入直接使用HTMLutils的方法即可实现。
+通过创建字典树，并进行查找比较，实现敏感词过滤  
 -[字典树实现敏感词过滤](https://www.jianshu.com/p/52709faef79c)
-![敏感词过滤流程图](https://github.com/goffery-Gong/wenda/tree/master/src/main/resources/敏感词过滤.svg)
+![敏感词过滤流程图](https://github.com/goffery-Gong/wenda/tree/master/src/main/resources/敏感词过滤.jpg)
+
+## 点赞和点踩功能，使用Redis实现
+	1.开发点踩和点赞功能，在此之前根据业务封装好jedis的增删改查操作，放在util包中。使用JedisPool连接池初始化连接。
+	其中：通过实现InitializingBean接口来进行类的初始化
+	
+	@Service
+	public class JedisAdaptor implements InitializingBean{
+		private JedisPool pool;
+		private static final Logger logger=LoggerFactory.getLogger(JedisAdaptor.class);
+		
+		@Override
+		//初始化连接池
+		public void afterPropertiesSet() throws Exception {
+			pool=new JedisPool("redis://localhost:6379/10");
+		}
+	}
+	2.根据需求确定key字段，格式是 like：实体类型：实体id 和 dislike：实体类型：实体id  
+	这样可以将喜欢一条新闻的人存在一个集合，不喜欢的存在另一个集合。通过统计数量可以获得点赞和点踩数。
+	
+	3.一般点赞点踩操作是先修改redis的值并获取返回值，然后再异步修改mysql数据库的likecount数值。  
+	这样既可以保证点赞操作快速完成，也可保证数据一致性。
+
+##	异步队列
+	-通过redis实现异步队列。
+	-EventConsumer中实现了ApplicationContextAware接口，可以在Spring初始化实例 Bean的时候，可以通过这个接口将当前的Spring上下文传入。  
+	通过创建一个实例，用于存储当前初始化的Spring上下文，可以在后续的应用场景中调用。
+	@Component
+	public class ApplicationContextHelper implements ApplicationContextAware {
+		 /** 
+	     * 以静态变量保存ApplicationContext,可在任意代码中取出ApplicaitonContext. 
+	     */  
+	     private static ApplicationContext applicationContext;
+	
+		 /** 
+	     * 实现ApplicationContextAware接口的context注入函数, 将其存入静态变量. 
+	 	 */ 
+	     @Override
+	     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	           ApplicationContextHelper.applicationContext = applicationContext;
+	     }
+		
+		 /** 
+	 	 * 从静态变量ApplicationContext中取得Bean, 自动转型为所赋值对象的类型. 
+	 	 */
+	     public static <T> T getBean(Class<T> clazz){
+	           return applicationContext.getBean(clazz);
+	     }
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
