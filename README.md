@@ -75,7 +75,7 @@ zhihu
 ## 问题发表功能（敏感词过滤）
 防止xss注入直接使用HTMLutils的方法即可实现。
 通过创建字典树，并进行查找比较，实现敏感词过滤  
--[字典树实现敏感词过滤](https://www.jianshu.com/p/52709faef79c)
+- [字典树实现敏感词过滤](https://www.jianshu.com/p/52709faef79c)  
 ![敏感词过滤流程图](https://github.com/goffery-Gong/wenda/tree/master/src/main/resources/敏感词过滤.jpg)
 
 ## 点赞和点踩功能，使用Redis实现
@@ -100,30 +100,26 @@ zhihu
 	这样既可以保证点赞操作快速完成，也可保证数据一致性。
 
 ##	异步队列
-	-通过redis实现异步队列。
-	-EventConsumer中实现了ApplicationContextAware接口，可以在Spring初始化实例 Bean的时候，可以通过这个接口将当前的Spring上下文传入。  
-	通过创建一个实例，用于存储当前初始化的Spring上下文，可以在后续的应用场景中调用。
+-通过redis实现异步队列。
+-EventConsumer中实现了ApplicationContextAware接口，可以在Spring初始化实例 Bean的时候，可以通过这个接口将当前的Spring上下文传入。  
+	加载Spring配置文件时，如果Spring配置文件中所定义的Bean类实现了ApplicationContextAware 接口，那么在加载Spring配置文件时，会自动调用ApplicationContextAware 接口中的
+	public void setApplicationContext(ApplicationContext context) throws BeansException方法，获得ApplicationContext 对象。
+	前提必须在Spring配置文件中使用@Component注册该类。
 	@Component
 	public class ApplicationContextHelper implements ApplicationContextAware {
-		 /** 
-	     * 以静态变量保存ApplicationContext,可在任意代码中取出ApplicaitonContext. 
-	     */  
-	     private static ApplicationContext applicationContext;
-	
-		 /** 
-	     * 实现ApplicationContextAware接口的context注入函数, 将其存入静态变量. 
-	 	 */ 
-	     @Override
-	     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-	           ApplicationContextHelper.applicationContext = applicationContext;
-	     }
+		//以静态变量保存ApplicationContext,可在任意代码中取出ApplicaitonContext. 
+	    private static ApplicationContext applicationContext;
+
+	    //实现ApplicationContextAware接口的context注入函数, 将其存入静态变量. 
+	    @Override
+	    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	          ApplicationContextHelper.applicationContext = applicationContext;
+	    }
 		
-		 /** 
-	 	 * 从静态变量ApplicationContext中取得Bean, 自动转型为所赋值对象的类型. 
-	 	 */
-	     public static <T> T getBean(Class<T> clazz){
-	           return applicationContext.getBean(clazz);
-	     }
+	 	//从静态变量ApplicationContext中取得Bean, 自动转型为所赋值对象的类型. 
+	    public static <T> T getBean(Class<T> clazz){
+	          return applicationContext.getBean(clazz);
+	    }
 	}
 
 	
