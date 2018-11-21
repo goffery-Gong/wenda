@@ -9,6 +9,8 @@ import com.nowcoder.service.QuestionService;
 import com.nowcoder.service.SensitiveService;
 import com.nowcoder.service.UserService;
 import com.nowcoder.utils.WendaUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import java.util.List;
  * Created by nowcoder on 2016/7/2.
  */
 @Controller
+@Api("评论控制器")
 public class CommentController {
     private static final Logger logger = LoggerFactory.getLogger(CommentController.class);
 
@@ -48,6 +51,7 @@ public class CommentController {
     @Autowired
     SensitiveService sensitiveService;
 
+    @ApiOperation("添加评论")
     @RequestMapping(path = {"/addComment"}, method = {RequestMethod.POST})
     public String addComment(@RequestParam("questionId") int questionId,
                              @RequestParam("content") String content) {
